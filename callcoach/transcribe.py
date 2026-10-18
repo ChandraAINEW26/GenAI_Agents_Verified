@@ -1,4 +1,4 @@
-"""Audio -> DealPulse transcript, fully local.
+"""Audio -> CallCoach transcript, fully local.
 
 Uses faster-whisper (install with `uv sync --extra audio`) instead of the
 original's paid OpenAI Whisper API. Whisper gives timestamps but not speakers,

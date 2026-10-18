@@ -1,10 +1,10 @@
-"""TalentScout CLI.
+"""BlindHire CLI.
 
-  uv run python -m talentscout run --thread demo            # stops at each review for your input
-  uv run python -m talentscout run --thread demo --auto-approve
-  uv run python -m talentscout resume --thread demo         # continue a run you stopped at a review
+  uv run python -m blindhire run --thread demo            # stops at each review for your input
+  uv run python -m blindhire run --thread demo --auto-approve
+  uv run python -m blindhire resume --thread demo         # continue a run you stopped at a review
 
-Reviews are saved in runs/talentscout.sqlite, so you can quit at a review
+Reviews are saved in runs/blindhire.sqlite, so you can quit at a review
 (Ctrl+C) and resume later, even from a new terminal.
 """
 
@@ -20,10 +20,10 @@ from rich.markdown import Markdown
 from rich.table import Table
 
 from agentkit import Tracer, console, get_llm
-from talentscout.workflow import build_workflow
+from blindhire.workflow import build_workflow
 
 HERE = Path(__file__).parent
-DB = Path("runs/talentscout.sqlite")
+DB = Path("runs/blindhire.sqlite")
 
 
 def ask_human(payload: dict, auto: bool) -> dict:
@@ -58,7 +58,7 @@ def drive(app, config: dict, first_input, auto: bool) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="talentscout", description="Blind-screening hiring pipeline")
+    parser = argparse.ArgumentParser(prog="blindhire", description="Blind-screening hiring pipeline")
     sub = parser.add_subparsers(dest="command", required=True)
     for name in ("run", "resume"):
         cmd = sub.add_parser(name)
@@ -71,7 +71,7 @@ def main() -> None:
 
     llm = get_llm()
     console.print(f"[dim]model: {llm.model}[/dim]")
-    out_dir = Path("runs/talentscout") / args.thread
+    out_dir = Path("runs/blindhire") / args.thread
     out_dir.mkdir(parents=True, exist_ok=True)
     DB.parent.mkdir(parents=True, exist_ok=True)
 

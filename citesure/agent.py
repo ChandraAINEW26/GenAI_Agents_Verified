@@ -1,4 +1,4 @@
-"""GroundTruth: a controllable plan-and-execute RAG agent.
+"""CiteSure: a controllable plan-and-execute RAG agent.
 
 Rebuild of NirDiamant/Controllable-RAG-Agent with these changes:
 
@@ -25,7 +25,7 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
 from agentkit import LLM, Tracer, dumps
-from groundtruth.index import CorpusIndex, support_ratio
+from citesure.index import CorpusIndex, support_ratio
 
 GROUNDING_THRESHOLD = 0.7
 

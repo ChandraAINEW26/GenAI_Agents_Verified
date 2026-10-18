@@ -1,8 +1,8 @@
-"""GroundTruth CLI.
+"""CiteSure CLI.
 
-  uv run python -m groundtruth ask "Who does Kestrel's account manager report to?"
-  uv run python -m groundtruth ask --corpus path/to/docs "your question"
-  uv run python -m groundtruth eval
+  uv run python -m citesure ask "Who does Kestrel's account manager report to?"
+  uv run python -m citesure ask --corpus path/to/docs "your question"
+  uv run python -m citesure eval
 """
 
 from __future__ import annotations
@@ -11,27 +11,27 @@ import argparse
 from pathlib import Path
 
 from agentkit import Tracer, console, get_llm
-from groundtruth.agent import ask, build_agent, render
-from groundtruth.evaluate import run_eval
-from groundtruth.index import CorpusIndex
+from citesure.agent import ask, build_agent, render
+from citesure.evaluate import run_eval
+from citesure.index import CorpusIndex
 
 HERE = Path(__file__).parent
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="groundtruth", description="Controllable, citation-checked RAG agent")
+    parser = argparse.ArgumentParser(prog="citesure", description="Controllable, citation-checked RAG agent")
     sub = parser.add_subparsers(dest="command", required=True)
 
     ask_cmd = sub.add_parser("ask", help="Answer one question")
     ask_cmd.add_argument("question")
     ask_cmd.add_argument("--corpus", type=Path, default=HERE / "sample_corpus")
     ask_cmd.add_argument("--max-steps", type=int, default=6)
-    ask_cmd.add_argument("--trace", type=Path, default=Path("runs/groundtruth-trace.jsonl"))
+    ask_cmd.add_argument("--trace", type=Path, default=Path("runs/citesure-trace.jsonl"))
 
     eval_cmd = sub.add_parser("eval", help="Run the golden question set")
     eval_cmd.add_argument("--corpus", type=Path, default=HERE / "sample_corpus")
     eval_cmd.add_argument("--golden", type=Path, default=HERE / "golden.yaml")
-    eval_cmd.add_argument("--report", type=Path, default=Path("runs/groundtruth-eval.md"))
+    eval_cmd.add_argument("--report", type=Path, default=Path("runs/citesure-eval.md"))
     eval_cmd.add_argument("--max-steps", type=int, default=6)
 
     args = parser.parse_args()

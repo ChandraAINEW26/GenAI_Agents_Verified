@@ -1,8 +1,8 @@
-"""DealPulse CLI.
+"""CallCoach CLI.
 
-  uv run python -m dealpulse analyze dealpulse/sample_calls/sunpeak_expansion.txt
-  uv run python -m dealpulse batch dealpulse/sample_calls          # every call + team report
-  uv run python -m dealpulse transcribe call.m4a --rep "Priya Shah" --account "Acme"   # needs --extra audio
+  uv run python -m callcoach analyze callcoach/sample_calls/sunpeak_expansion.txt
+  uv run python -m callcoach batch callcoach/sample_calls          # every call + team report
+  uv run python -m callcoach transcribe call.m4a --rep "Priya Shah" --account "Acme"   # needs --extra audio
 """
 
 from __future__ import annotations
@@ -12,14 +12,14 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from agentkit import Tracer, console, get_llm
-from dealpulse.pipeline import analyse_call, team_report
-from dealpulse.transcribe import transcribe_audio
+from callcoach.pipeline import analyse_call, team_report
+from callcoach.transcribe import transcribe_audio
 
-OUT = Path("runs/dealpulse")
+OUT = Path("runs/callcoach")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="dealpulse", description="Sales call intelligence")
+    parser = argparse.ArgumentParser(prog="callcoach", description="Sales call intelligence")
     sub = parser.add_subparsers(dest="command", required=True)
     one = sub.add_parser("analyze", help="Analyse one transcript")
     one.add_argument("transcript", type=Path)

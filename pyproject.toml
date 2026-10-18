@@ -1,7 +1,7 @@
 [project]
 name = "genai-agents-practice"
 version = "0.1.0"
-description = "Rebuilt GenAI agent projects for practice: GroundTruth (RAG), TalentScout (hiring), DealPulse (sales calls)"
+description = "Rebuilt GenAI agent projects for practice: CiteSure (RAG), BlindHire (hiring), CallCoach (sales calls)"
 requires-python = ">=3.12"
 dependencies = [
     "anthropic>=1.15.0",

@@ -17,8 +17,8 @@ import yaml
 from pydantic import BaseModel
 
 from agentkit import LLM, Tracer
-from groundtruth.agent import ask, build_agent
-from groundtruth.index import CorpusIndex
+from citesure.agent import ask, build_agent
+from citesure.index import CorpusIndex
 
 
 class Verdict(BaseModel):
@@ -79,7 +79,7 @@ def run_eval(llm: LLM, corpus: Path, golden: Path, report: Path, max_steps: int 
         "usage": llm.usage.summary(llm.model),
     }
     lines = [
-        f"# GroundTruth evaluation — {llm.model}",
+        f"# CiteSure evaluation — {llm.model}",
         "",
         f"- Accuracy: **{summary['accuracy']:.0%}** ({totals['correct']}/{n})",
         f"- Source recall: **{summary['source_recall']:.0%}**",

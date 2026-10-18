@@ -1,4 +1,4 @@
-"""GroundTruth tests - offline, using FakeLLM. Run: uv run pytest -q"""
+"""CiteSure tests - offline, using FakeLLM. Run: uv run pytest -q"""
 
 import re
 from pathlib import Path
@@ -6,10 +6,10 @@ from pathlib import Path
 import pytest
 
 from agentkit import FakeLLM
-from groundtruth.agent import ask, build_agent
-from groundtruth.index import BM25, CorpusIndex, Passage, chunk_text, rrf, support_ratio
+from citesure.agent import ask, build_agent
+from citesure.index import BM25, CorpusIndex, Passage, chunk_text, rrf, support_ratio
 
-CORPUS = Path(__file__).parents[1] / "groundtruth" / "sample_corpus"
+CORPUS = Path(__file__).parents[1] / "citesure" / "sample_corpus"
 
 
 @pytest.fixture

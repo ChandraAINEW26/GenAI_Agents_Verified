@@ -1,4 +1,4 @@
-"""DealPulse: sales call intelligence with evidence-checked findings.
+"""CallCoach: sales call intelligence with evidence-checked findings.
 
 Rebuild of GenAI_Agents #28 (Sales Call Analyzer). The original sent the whole
 transcript to one CrewAI agent and printed whatever JSON came back. Changes:
@@ -31,8 +31,8 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
 from agentkit import LLM, Tracer, dumps
-from dealpulse.transcript import Call, call_from_dict, call_to_dict, conversation_metrics, load_call
-from groundtruth.index import support_ratio
+from callcoach.transcript import Call, call_from_dict, call_to_dict, conversation_metrics, load_call
+from citesure.index import support_ratio
 
 QUOTE_THRESHOLD = 0.75
 

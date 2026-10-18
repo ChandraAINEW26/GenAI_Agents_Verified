@@ -1,13 +1,13 @@
-"""DealPulse tests - offline, using FakeLLM. Run: uv run pytest -q"""
+"""CallCoach tests - offline, using FakeLLM. Run: uv run pytest -q"""
 
 import json
 from pathlib import Path
 
 from agentkit import FakeLLM
-from dealpulse.pipeline import analyse_call, quote_in_turn, scorecard, unsupported_figures
-from dealpulse.transcript import conversation_metrics, load_call, parse_transcript
+from callcoach.pipeline import analyse_call, quote_in_turn, scorecard, unsupported_figures
+from callcoach.transcript import conversation_metrics, load_call, parse_transcript
 
-CALLS = Path(__file__).parents[1] / "dealpulse" / "sample_calls"
+CALLS = Path(__file__).parents[1] / "callcoach" / "sample_calls"
 
 
 def test_parse_and_metrics():

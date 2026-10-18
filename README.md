@@ -5,9 +5,9 @@ Python + LangGraph, renamed, and extended with production-style features.
 
 | Project | Rebuilt from | What it does |
 |---|---|---|
-| **GroundTruth** | #45 Controllable RAG Agent | Answers multi-hop questions from your documents, with checked citations, and says "I don't know" when the documents don't say |
-| **TalentScout** | #46 HR AI Assistant | Hiring pipeline: job description → blind CV screening → shortlist → interview kits → drafted emails, with human approvals |
-| **DealPulse** | #28 Sales Call Analyzer | Sales call transcript or audio → coaching scorecard, MEDDPICC, objections, CRM update JSON, follow-up email, team report |
+| **CiteSure** | #45 Controllable RAG Agent | Answers multi-hop questions from your documents, with checked citations, and says "I don't know" when the documents don't say |
+| **BlindHire** | #46 HR AI Assistant | Hiring pipeline: job description → blind CV screening → shortlist → interview kits → drafted emails, with human approvals |
+| **CallCoach** | #28 Sales Call Analyzer | Sales call transcript or audio → coaching scorecard, MEDDPICC, objections, CRM update JSON, follow-up email, team report |
 
 All three share `agentkit/`: one LLM interface with three backends, plus run tracing.
 
@@ -15,7 +15,7 @@ All three share `agentkit/`: one LLM interface with three backends, plus run tra
 
 ```bash
 cd ~/Documents/AIPrep/genai-agents-practice
-uv sync                      # add --extra audio for DealPulse audio transcription
+uv sync                      # add --extra audio for CallCoach audio transcription
 ```
 
 Pick a model (all three projects use the same setting):
@@ -29,19 +29,19 @@ Pick a model (all three projects use the same setting):
 ## Run
 
 ```bash
-# GroundTruth
-uv run python -m groundtruth ask "Which account manager owns the customer whose outage was caused by firmware 4.2, and when does it renew?"
-uv run python -m groundtruth ask --corpus ~/some/folder/of/pdfs "your question"
-uv run python -m groundtruth eval            # golden set -> runs/groundtruth-eval.md
+# CiteSure
+uv run python -m citesure ask "Which account manager owns the customer whose outage was caused by firmware 4.2, and when does it renew?"
+uv run python -m citesure ask --corpus ~/some/folder/of/pdfs "your question"
+uv run python -m citesure eval            # golden set -> runs/citesure-eval.md
 
-# TalentScout (stops at each review; Ctrl+C at a review and `resume` later)
-uv run python -m talentscout run --thread demo
-uv run python -m talentscout resume --thread demo
+# BlindHire (stops at each review; Ctrl+C at a review and `resume` later)
+uv run python -m blindhire run --thread demo
+uv run python -m blindhire resume --thread demo
 
-# DealPulse
-uv run python -m dealpulse analyze dealpulse/sample_calls/halden_renewal.txt
-uv run python -m dealpulse batch dealpulse/sample_calls        # + runs/dealpulse/team-report.md
-uv run python -m dealpulse transcribe call.m4a --rep "Priya Shah" --account "Acme"   # needs --extra audio
+# CallCoach
+uv run python -m callcoach analyze callcoach/sample_calls/halden_renewal.txt
+uv run python -m callcoach batch callcoach/sample_calls        # + runs/callcoach/team-report.md
+uv run python -m callcoach transcribe call.m4a --rep "Priya Shah" --account "Acme"   # needs --extra audio
 
 # Offline tests (no model calls)
 uv run pytest -q
@@ -51,7 +51,7 @@ Everything a run produces goes to `runs/` (reports, traces as JSONL, outbox, CRM
 
 ---
 
-## GroundTruth (from #45 Controllable RAG Agent)
+## CiteSure (from #45 Controllable RAG Agent)
 
 ```mermaid
 flowchart LR
@@ -78,7 +78,7 @@ flowchart LR
 
 Sample data is a fictional company (`sample_corpus/`) whose facts are spread across files, so every golden question needs 2–3 lookups.
 
-## TalentScout (from #46 HR AI Assistant)
+## BlindHire (from #46 HR AI Assistant)
 
 ```mermaid
 flowchart LR
@@ -100,7 +100,7 @@ flowchart LR
 | `NodeInterrupt`, in-memory | `interrupt()` + SQLite checkpointer: stop at a review, resume later by thread id |
 | — | Inclusive-language lint on the job description; interview kits aimed at each candidate's gaps |
 
-## DealPulse (from #28 Sales Call Analyzer)
+## CallCoach (from #28 Sales Call Analyzer)
 
 ```mermaid
 flowchart LR
@@ -123,7 +123,7 @@ flowchart LR
 
 ## Practice ideas
 
-1. **GroundTruth** — add dense embeddings as a 4th ranking in the RRF fusion and check whether `eval` improves; add a question that needs arithmetic across three documents.
-2. **TalentScout** — run each CV twice and flag candidates whose scores differ by more than 0.5 (consistency check); add a "structured reference check" step with its own interrupt.
-3. **DealPulse** — compare the same call scored by Claude vs Ollama and measure agreement per scorecard component; add a "deal health over time" view across several calls for one account.
+1. **CiteSure** — add dense embeddings as a 4th ranking in the RRF fusion and check whether `eval` improves; add a question that needs arithmetic across three documents.
+2. **BlindHire** — run each CV twice and flag candidates whose scores differ by more than 0.5 (consistency check); add a "structured reference check" step with its own interrupt.
+3. **CallCoach** — compare the same call scored by Claude vs Ollama and measure agreement per scorecard component; add a "deal health over time" view across several calls for one account.
 4. **All** — swap `CLAUDE_MODEL` between Opus, Sonnet and Haiku and compare eval accuracy against the cost printed at the end of each run.

@@ -1,4 +1,4 @@
-"""TalentScout tests - offline, using FakeLLM. Run: uv run pytest -q"""
+"""BlindHire tests - offline, using FakeLLM. Run: uv run pytest -q"""
 
 from pathlib import Path
 
@@ -7,10 +7,10 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import Command
 
 from agentkit import FakeLLM
-from talentscout.redact import lint_job_description, redact_cv
-from talentscout.workflow import CVAssessment, build_workflow, finalise_score, rank_candidates
+from blindhire.redact import lint_job_description, redact_cv
+from blindhire.workflow import CVAssessment, build_workflow, finalise_score, rank_candidates
 
-SAMPLE = Path(__file__).parents[1] / "talentscout" / "sample"
+SAMPLE = Path(__file__).parents[1] / "blindhire" / "sample"
 JOB = yaml.safe_load((SAMPLE / "job.yaml").read_text())
 
 

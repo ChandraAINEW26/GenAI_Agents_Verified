@@ -1,4 +1,4 @@
-"""TalentScout: a blind-screening hiring pipeline with human approvals.
+"""BlindHire: a blind-screening hiring pipeline with human approvals.
 
 Rebuild of GenAI_Agents #46 (HR AI Assistant). The original scraped LinkedIn
 with a session cookie and parsed scores from free text with a regex; this
@@ -37,8 +37,8 @@ from langgraph.types import Send, interrupt
 from pydantic import BaseModel, Field
 
 from agentkit import LLM, Tracer, dumps
-from groundtruth.index import support_ratio
-from talentscout.redact import lint_job_description, redact_cv
+from citesure.index import support_ratio
+from blindhire.redact import lint_job_description, redact_cv
 
 EVIDENCE_THRESHOLD = 0.8
 UNVERIFIED_CAP = 2
