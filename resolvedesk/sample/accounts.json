@@ -1,0 +1,38 @@
+{
+  "C-1001": {
+    "company": "Halden Logistics",
+    "plan": "Enterprise",
+    "first_response_sla_hours": 4,
+    "account_manager": "Ravi Menon",
+    "sso": false,
+    "robots": 40,
+    "invoices": [
+      {"id": "INV-2026-10-1001", "date": "2026-10-01", "amount_usd": 3600, "status": "paid", "payments": [3600, 3600]},
+      {"id": "INV-2026-09-1001", "date": "2026-09-01", "amount_usd": 3600, "status": "paid", "payments": [3600]}
+    ],
+    "incidents": [{"id": "INC-2041", "date": "2026-05-14", "type": "picking outage", "duration_hours": 6, "cause": "firmware 4.2 memory leak", "review_complete": true}]
+  },
+  "C-1002": {
+    "company": "Sunpeak Grocers",
+    "plan": "Business",
+    "first_response_sla_hours": 8,
+    "account_manager": "Priya Shah",
+    "sso": true,
+    "robots": 120,
+    "invoices": [
+      {"id": "INV-2026-10-1002", "date": "2026-10-01", "amount_usd": 10800, "status": "paid", "payments": [10800]},
+      {"id": "INV-2026-10-1002-ADD", "date": "2026-10-05", "amount_usd": 90, "status": "paid", "payments": [90, 90]}
+    ],
+    "incidents": []
+  },
+  "C-1003": {
+    "company": "Kestrel Pharma",
+    "plan": "Starter",
+    "first_response_sla_hours": 24,
+    "account_manager": "Ravi Menon",
+    "sso": false,
+    "robots": 12,
+    "invoices": [{"id": "INV-2026-10-1003", "date": "2026-10-01", "amount_usd": 1080, "status": "open", "payments": []}],
+    "incidents": []
+  }
+}

@@ -1,0 +1,28 @@
+# Rating and underwriting rules. The model never sees or changes these.
+minimum_premium_usd: 750
+
+# Factor by years in business (first row whose max_years >= years applies).
+experience:
+  - {max_years: 1, factor: 1.15}
+  - {max_years: 4, factor: 1.05}
+  - {factor: 1.00}
+
+# Factor by claims in the last five years.
+claims:
+  - {max_claims: 0, factor: 0.95}
+  - {max_claims: 1, factor: 1.00}
+  - {max_claims: 2, factor: 1.15}
+  - {max_claims: 3, factor: 1.30}
+
+# Credit for a written safety program (only with a quote from the submission as evidence).
+safety_program_factor: 0.95
+
+# Any of these sends the submission to a human underwriter instead of an instant quote.
+referral:
+  revenue_over_usd: 5000000
+  employees_over: 100
+  claims_over: 3
+  high_hazard_share_at_least_pct: 50
+
+# Facts required before any quote.
+required_facts: [annual_revenue_usd, employees, years_in_business, claims_last_5y]

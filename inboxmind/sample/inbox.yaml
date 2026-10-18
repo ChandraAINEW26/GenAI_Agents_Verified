@@ -1,0 +1,92 @@
+# label = what Jordan actually wants. `split: train` emails are corrected with `feedback` in the learning demo;
+# `split: test` emails are never corrected and measure what was learned.
+- id: E-01
+  split: train
+  from: Sam Reyes <sam@talentbridge.io>
+  subject: Exciting Head of AI role at a Series C robotics start-up
+  body: Hi Jordan, I came across your profile and think you'd be a great fit for a Head of AI role with a well-funded robotics start-up. Would you be open to a quick call this week?
+  label: ignore
+  feedback: I'm not looking for a new job. Ignore recruiter outreach.
+- id: E-02
+  split: train
+  from: AI Weekly <newsletter@aiweekly.news>
+  subject: "AI Weekly #212: agent evaluation, small models, robotics"
+  body: This week's issue covers new agent evaluation benchmarks, efficient small models and three robotics papers worth reading.
+  label: notify
+  feedback: I read AI Weekly every week. Notify me about it, don't ignore it.
+- id: E-03
+  split: train
+  from: FleetOS CI <ci@northwind.dev>
+  subject: "Build passed: fleetos main #4411"
+  body: All 1,284 tests passed in 11m 32s. No action needed.
+  label: ignore
+  feedback: Successful builds are noise. Ignore emails whose subject starts with "Build passed".
+- id: E-04
+  split: train
+  from: Dana Ortiz <dana.ortiz@kestrelpharma.com>
+  subject: "FYI: Q4 volume forecast"
+  body: Hi Jordan, just so you know, we expect pick volumes in Basel to rise about 20% in Q4 because of the flu-vaccine season. No action needed for now. Dana is our operations director, by the way, in case you need anything.
+  label: respond
+  feedback: Kestrel Pharma is a key account. Always reply to anyone at kestrelpharma.com, even FYIs.
+- id: E-05
+  split: train
+  from: Helen Ortiz <helen.ortiz@board.northwind.com>
+  subject: Board pack - AI strategy slide
+  body: Jordan, the board would like one slide on AI strategy for the November meeting. Can we meet on Tuesday October 21 for 30 minutes to go through a first draft?
+  label: respond
+  feedback: Correct - board requests always need a reply.
+- id: E-06
+  split: train
+  from: Northwind Events <events@northwind.com>
+  subject: "Lunch & learn: sourdough baking with the Pune office"
+  body: Join colleagues on Thursday for a relaxed lunch and a sourdough demo. Sign up on the intranet.
+  label: ignore
+  feedback: Internal social events from events@northwind.com can be ignored.
+- id: T-01
+  split: test
+  from: Mia Chen <mia@hirewell.co>
+  subject: Principal ML Engineer opportunity - fully remote
+  body: Hello Jordan, a client of ours is hiring a Principal ML Engineer. The package is very competitive. Are you open to a conversation?
+  label: ignore
+- id: T-02
+  split: test
+  from: AI Weekly <digest@aiweekly.news>
+  subject: "AI Weekly #213: retrieval, robotics foundation models"
+  body: In this issue - hybrid retrieval in production, new robotics foundation models, and a guide to LLM cost control.
+  label: notify
+- id: T-03
+  split: test
+  from: FleetOS CI <ci@northwind.dev>
+  subject: "Build passed: fleetos release-2.9 #4420"
+  body: All 1,301 tests passed in 12m 05s. No action needed.
+  label: ignore
+- id: T-04
+  split: test
+  from: FleetOS CI <ci@northwind.dev>
+  subject: "Build FAILED: fleetos main #4425"
+  body: 3 tests failed in the planner module after commit 8c1f2e0. The main branch is red.
+  label: notify
+- id: T-05
+  split: test
+  from: Marta Keller <marta.keller@kestrelpharma.com>
+  subject: "FYI: new warehouse lead in Basel"
+  body: Hi Jordan, quick note that I have taken over as warehouse lead in Basel from Dana's team. I'm your contact for anything on the floor from now on.
+  label: respond
+- id: T-06
+  split: test
+  from: Northwind Events <events@northwind.com>
+  subject: "Lunch & learn: robotics trivia quiz"
+  body: Test your robotics knowledge at Friday's lunch quiz. Prizes for the top three teams.
+  label: ignore
+- id: T-07
+  split: test
+  from: Priya Shah <priya.shah@northwind.com>
+  subject: Can you review the CallCoach rubric by Thursday?
+  body: Hi Jordan, I've updated the coaching rubric weights. Could you review them by Thursday October 23 so I can roll them out to the team?
+  label: respond
+- id: T-08
+  split: test
+  from: CloudVendor Billing <billing@cloudvendor.example>
+  subject: Your October invoice is available
+  body: Your invoice for October is now available in the billing console. Payment will be taken automatically on November 1.
+  label: notify

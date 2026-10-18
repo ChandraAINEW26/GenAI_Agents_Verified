@@ -6,7 +6,7 @@
 ![LLM](https://img.shields.io/badge/LLM-Claude%20%7C%20Ollama-8a63d2)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-**Three production-style GenAI agents built on LangGraph, where the LLM proposes and code verifies.**
+**Six production-style GenAI agents built on LangGraph, where the LLM proposes and code verifies.**
 Every answer, score and finding carries evidence from the source material, deterministic code checks that
 evidence, and anything that fails the check is rejected rather than shown as fact.
 
@@ -15,6 +15,9 @@ evidence, and anything that fails the check is rejected rather than shown as fac
 | **[CiteSure](citesure/)** | Knowledge / RAG | Answers multi-step questions from your documents with verified citations, and abstains when the documents don't say | 6/6 and 5/6 on two golden-set runs; never answered the unanswerable question |
 | **[BlindHire](blindhire/)** | HR / recruiting | Drafts the job description, screens anonymised CVs against a weighted rubric with quoted evidence, and stops for human approval | Same shortlist across runs; no name or gender label ever reaches the scorer (tested) |
 | **[CallCoach](callcoach/)** | Sales | Turns a call transcript or audio into a coaching scorecard, MEDDPICC, CRM update and follow-up email | Strong call 94–100, weak renewal call 32–38 with high risk |
+| **[ResolveDesk](resolvedesk/)** | Customer support | Answers tickets from a help centre and account record with checked citations; redacts card data; escalates with a handoff note | 23/23 checks on 10 tickets, incl. injection and security cases |
+| **[InboxMind](inboxmind/)** | Productivity | Triages and drafts email, and learns from your corrections through reviewable, versioned rules | 50% → 100% on held-out emails after 6 corrections |
+| **[QuoteRight](quoteright/)** | Insurance | Classifies a business from free text, prices it with a deterministic engine, applies underwriting rules | 18/18 checks on 7 submissions; injection cannot move the price |
 
 ---
 
@@ -22,11 +25,14 @@ evidence, and anything that fails the check is rejected rather than shown as fac
 
 ```mermaid
 flowchart TB
-    U([User / CLI]) --> CS & BH & CC
+    U([User / CLI]) --> CS & BH & CC & RD & IM & QR
     subgraph Agents["LangGraph agents"]
         CS["<b>CiteSure</b><br/>anonymize → plan → retrieve ⟲ replan<br/>→ answer → verify"]
         BH["<b>BlindHire</b><br/>JD ⏸ → redact → score ×N ∥<br/>→ rank ⏸ → kits → outbox"]
         CC["<b>CallCoach</b><br/>parse → 4 analysers ∥<br/>→ verify → coach → scorecard"]
+        RD["<b>ResolveDesk</b><br/>guard → triage → retrieve<br/>→ draft → verify → route"]
+        IM["<b>InboxMind</b><br/>recall → triage → learn<br/>→ draft → check + rule learning"]
+        QR["<b>QuoteRight</b><br/>facts → classify ⟲ validate<br/>→ price → cover"]
     end
     subgraph Verify["Deterministic verification (code)"]
         V1[citation ids exist<br/>extract ⊆ source]
@@ -36,6 +42,9 @@ flowchart TB
     CS --> V1
     BH --> V2
     CC --> V3
+    RD --> V4[reply cites retrieved passages<br/>figures exist · policy routes]
+    IM --> V5[facts stated by the email<br/>times are free · rules approved]
+    QR --> V6[facts quoted · engine prices<br/>rules in code · figures match]
     subgraph Kit["agentkit"]
         L[Typed LLM interface<br/>Pydantic structured outputs]
         T[JSONL tracing · token & cost meter]
@@ -48,7 +57,7 @@ flowchart TB
     CC -.-> W[faster-whisper<br/>local audio]
 
     classDef verify fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
-    class V1,V2,V3 verify
+    class V1,V2,V3,V4,V5,V6 verify
 ```
 
 `⏸` = human approval (LangGraph `interrupt`), `∥` = parallel branches, `⟲` = loop. Detailed design:
@@ -91,13 +100,45 @@ flowchart TB
 </td></tr>
 </table>
 
+<table>
+<tr><th>ResolveDesk</th><th>InboxMind</th><th>QuoteRight</th></tr>
+<tr valign="top"><td>
+
+- Knowledge-grounded replies with citations
+- Luhn-checked card and secret redaction
+- Prompt-injection tripwire
+- Written escalation policy with reasons
+- Handoff notes, queues, SLA acknowledgement
+- Figure verification of replies
+
+</td><td>
+
+- Semantic, episodic and procedural memory in SQLite
+- Corrections become reviewable rules
+- Rule preview before approval; retire, never delete
+- Rules applied by code before the LLM
+- Calendar-checked drafts, never sent
+- Measured learning on held-out emails
+
+</td><td>
+
+- Deterministic Decimal rating engine
+- Facts accepted only with a real quote
+- Classification validated in code and by a grader
+- Underwriting rules in YAML (decline / refer / quote)
+- Injection cannot change the price
+- `rate` command: instant what-if, no LLM
+
+</td></tr>
+</table>
+
 ## Quick start
 
 ```bash
 git clone https://github.com/ChandraAINEW26/GenAI_Agents_Verified.git
 cd GenAI_Agents_Verified
 uv sync                          # add --extra audio for CallCoach audio transcription
-uv run pytest -q                 # 18 offline tests, no model needed
+uv run pytest -q                 # 41 offline tests, no model needed
 ```
 
 Choose a model with one environment variable:
@@ -119,6 +160,10 @@ uv run python -m blindhire resume --thread demo
 
 uv run python -m callcoach batch callcoach/sample_calls
 uv run python -m callcoach transcribe call.m4a --rep "Priya Shah" --account "Acme"
+
+uv run python -m resolvedesk batch
+uv run python -m inboxmind learn-demo
+uv run python -m quoteright batch
 ```
 
 Outputs (reports, traces, outbox, CRM JSON) are written to `runs/`. Sample outputs from real runs are in
@@ -163,10 +208,13 @@ Ranges across four runs.
 
 ```text
 .
-├── agentkit/            shared LLM interface (Claude, Ollama, Fake), tracing, usage meter
+├── agentkit/            shared LLM interface (Claude, Ollama, Fake), tracing, BM25/RRF, figure and injection checks
 ├── citesure/            plan-and-execute RAG agent, index, evaluation, sample corpus, golden set
 ├── blindhire/           hiring workflow, redaction, sample job and CVs
 ├── callcoach/           call pipeline, transcript parser, audio transcription, sample calls
+├── resolvedesk/         support agent, input guard, sample knowledge base, accounts, tickets
+├── inboxmind/           email agent, SQLite memory, sample inbox and calendar
+├── quoteright/          quoting agent, rating engine, sample categories, rules, submissions
 ├── tests/               offline tests for all three agents
 ├── docs/
 │   ├── ARCHITECTURE.md  shared design, patterns, trade-offs
@@ -192,9 +240,9 @@ refusal fallbacks) · Ollama · Pydantic v2 · faster-whisper · ffmpeg · pypdf
 
 ## Acknowledgements
 
-The project ideas come from three tutorials in
+The project ideas come from six tutorials in
 [NirDiamant/GenAI_Agents](https://github.com/NirDiamant/GenAI_Agents) (Controllable RAG Agent, HR AI Assistant,
-Sales Call Analyzer). The code, design and features here are an independent implementation.
+Sales Call Analyzer, Customer Support Agent, Memory-Enhanced Email Agent, Contextual Quoting System). The code, design and features here are an independent implementation.
 
 ## License
 

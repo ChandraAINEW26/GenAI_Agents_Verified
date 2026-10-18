@@ -2,7 +2,8 @@
 
 This document covers what the three agents share: the LLM layer, the "LLM proposes, code verifies" pattern,
 orchestration, state, testing, and the trade-offs behind each choice. Each project's own README covers its graph in
-detail: [CiteSure](../citesure/README.md) · [BlindHire](../blindhire/README.md) · [CallCoach](../callcoach/README.md).
+detail: [CiteSure](../citesure/README.md) · [BlindHire](../blindhire/README.md) · [CallCoach](../callcoach/README.md) ·
+[ResolveDesk](../resolvedesk/README.md) · [InboxMind](../inboxmind/README.md) · [QuoteRight](../quoteright/README.md).
 
 ## System overview
 
@@ -50,6 +51,13 @@ reliably). The pattern repeats across all three:
 | Code verifies | Extract words ⊆ source passage; cited ids were retrieved | Quote is in the anonymised CV; must-haves backed by a quote | Quote is in the cited turn; email figures were said on the call |
 | Code decides | Step budget, abstain | Weighted score, knockouts, shortlist | Metrics, scorecard, risk flags |
 | On failure | Extract rejected; answer rewritten once, then abstain | Score capped at 2, must-have marked not met | Finding dropped from score, CRM and synthesis; listed in report |
+
+| | ResolveDesk | InboxMind | QuoteRight |
+|---|---|---|---|
+| LLM proposes | Triage, reply with citations, handoff note | Label, facts, draft, a rule from a correction | Extracted facts with quotes, category shares |
+| Code verifies | Cited ids were retrieved; figures exist in sources | Facts stated by the email; offered times are free | Fact quotes are real; codes, shares and quotes valid |
+| Code decides | Escalation policy, queue, priority floor | Applies approved rules before the LLM | Premium (Decimal), underwriting decision |
+| On failure | Escalate to a human with a handoff | Draft flagged, never sent; rule needs approval | Fact treated as missing; classification retry, then refer |
 
 The checks are deliberately simple (substring and word-overlap tests). They run in microseconds, are fully
 unit-tested, and catch the most damaging failure, invented content, without a second LLM call.
@@ -109,6 +117,9 @@ classDiagram
 | Self-correction loop | CiteSure | `verify → final_answer` with an attempt counter |
 | Map (dynamic fan-out) | BlindHire | `Send("score_cv", …)` per CV; results merged with an `operator.add` reducer |
 | Static fan-out / fan-in | CallCoach | Four edges from `load`; `add_edge([four analysers], "verify")` joins them |
+| Policy routing | ResolveDesk | Conditional edge into `escalate` driven by a code-computed list of reasons |
+| Learning loop | InboxMind | Feedback → episode + proposed rule → preview → approval → rule applied at `recall` |
+| Validate-and-retry | QuoteRight | `classify → classify` once with reviewer feedback, then refer |
 | Human-in-the-loop | BlindHire | `interrupt(payload)` inside review nodes; resumed with `Command(resume=…)` |
 | Durable state | BlindHire | `SqliteSaver` checkpointer; thread id = run id; `resume` reads pending interrupts |
 
@@ -143,7 +154,7 @@ CLI run ends with a usage line: calls, input/output tokens, model time and, for 
 | Safety properties | No candidate name reaches the scorer; invented extracts and quotes never reach answers, CRM or synthesis; unknown citations dropped | Assertions on `FakeLLM.calls` and outputs |
 | Quality | Answer accuracy, source recall, abstain accuracy | `citesure eval` against a golden set with a real model |
 
-All 18 tests run offline in under a second and run in CI on every push.
+All 41 tests run offline in under a second and run in CI on every push.
 
 ## Security and privacy
 

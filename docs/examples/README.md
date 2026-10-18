@@ -14,3 +14,6 @@ Real outputs from runs with `gpt-oss:120b-cloud` on the bundled fictional data. 
 | [callcoach-CALL-1029-followup-email.md](callcoach-CALL-1029-followup-email.md) | CallCoach | Follow-up email draft with [placeholders] for details the rep must supply |
 | [callcoach-CALL-1031-report.md](callcoach-CALL-1031-report.md) | CallCoach | Strong expansion call for comparison |
 | [callcoach-team-report.md](callcoach-team-report.md) | CallCoach | Per-rep averages, calls ranked by score, objection themes |
+| [resolvedesk-batch-report.md](resolvedesk-batch-report.md) | ResolveDesk | 10 tickets: automatic answers with sources, escalations with reasons and handoff notes |
+| [quoteright-batch-report.md](quoteright-batch-report.md) | QuoteRight | 7 submissions: quotes with premium breakdown, a decline, referrals, a request for information |
+| [inboxmind-learning-report.md](inboxmind-learning-report.md) | InboxMind | Accuracy before vs after learning, rules and facts learned, drafts |

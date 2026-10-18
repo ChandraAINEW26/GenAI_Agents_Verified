@@ -37,7 +37,7 @@ from langgraph.types import Send, interrupt
 from pydantic import BaseModel, Field
 
 from agentkit import LLM, Tracer, dumps
-from citesure.index import support_ratio
+from agentkit.text import support_ratio
 from blindhire.redact import lint_job_description, redact_cv
 
 EVIDENCE_THRESHOLD = 0.8
