@@ -1,0 +1,32 @@
+[project]
+name = "genai-agents-practice"
+version = "0.1.0"
+description = "Rebuilt GenAI agent projects for practice: GroundTruth (RAG), TalentScout (hiring), DealPulse (sales calls)"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.15.0",
+    "langgraph>=1.2.16",
+    "langgraph-checkpoint-sqlite>=3.1.2",
+    "ollama>=0.6.3",
+    "pydantic>=2.14.1",
+    "pypdf>=6.21.1",
+    "pyyaml>=6.0.3",
+    "rich>=15.0.0",
+]
+
+[project.optional-dependencies]
+audio = [
+    "faster-whisper>=1.2.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -1,0 +1,30 @@
+---
+call_id: CALL-1031
+date: 2026-10-08
+rep: Priya Shah
+account: Sunpeak Grocers
+stage: Proposal
+speakers:
+  Priya: rep
+  Dana: customer
+  Marco: customer
+---
+[00:00] Priya: Thanks for making time, Dana and Marco. Last time you mentioned the new Round Rock fulfilment centre. What would a good outcome for today look like for you?
+[00:12] Dana: We want to know if forty more Courier C3 robots can be live in Round Rock by March, before the spring peak.
+[00:24] Priya: That's helpful. What happens if they're not live by March?
+[00:31] Dana: Then we hire about thirty seasonal pickers, and honestly that's what we've done for years. It costs us roughly nine hundred thousand dollars a season and the error rate is bad.
+[00:47] Priya: So the robots need to beat nine hundred thousand a season and fix mispicks. Who else besides you two signs off on this?
+[00:58] Marco: Final approval is with our CFO, Helen Ortiz. Anything over five hundred thousand goes to her and then the board in January.
+[01:10] Priya: Got it, CFO Helen Ortiz and then the January board. Dana, I want to be upfront about June. I know the battery warnings shook the team.
+[01:22] Dana: They did. My floor managers lost trust for a week. If that happens in Round Rock during peak, I'm the one who gets blamed.
+[01:35] Priya: That's fair. The root cause was a bad cell batch from our supplier, and every pack from that batch was replaced. I'll send you the full root cause report and the new incoming-inspection process our quality team added.
+[01:50] Dana: That would help. I need something I can show my managers.
+[01:56] Marco: My concern is price. Vectra Robotics quoted us about eighteen percent less per unit for their carts.
+[02:07] Priya: What did Vectra include in that quote? Fleet software, spare packs, on-site support?
+[02:14] Marco: I'm not sure. I think software is extra.
+[02:19] Priya: If you can share the line items, I'll build a side-by-side. Our price includes FleetOS and next-day spare packs, which is usually where the gap closes.
+[02:31] Marco: I can send it, but it needs to come back before the board pack is due on December 15th.
+[02:40] Priya: Understood. So next steps: I send the battery root cause report by Friday the 10th. Marco sends the Vectra line items, and I return a side-by-side proposal by October 24th. Does that work?
+[02:55] Dana: Yes. And can we see a C3 running in another grocery site?
+[03:02] Priya: Yes, I'll set up a site visit at our Dallas customer in early November and send you two dates by next Wednesday.
+[03:12] Dana: Great. If the report checks out, I'll champion this with Helen.

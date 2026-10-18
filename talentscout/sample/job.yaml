@@ -1,0 +1,32 @@
+title: Senior AI Engineer
+company: Northwind Robotics (fictional) builds warehouse robots and the FleetOS software that runs them.
+location: Pune, India (hybrid) or remote within India
+years_experience: 5
+salary_range: INR 45-60 lakh per year
+interview_window: 2026-11-02 to 2026-11-13
+responsibilities:
+  - Build retrieval and agent features that answer operators' questions about their robot fleet
+  - Take LLM features from prototype to production, including monitoring and cost control
+  - Design evaluation sets and quality gates for LLM outputs
+  - Mentor two mid-level engineers
+must_have:
+  - Python in production for 3+ years
+  - Built and shipped an LLM application (RAG, agents or similar) to real users
+  - Deployed and operated services on a public cloud (AWS, GCP or Azure)
+nice_to_have:
+  - LangGraph or another agent orchestration framework
+  - Evaluation of LLM systems (golden sets, LLM judges, regression gates)
+  - Kubernetes
+  - Robotics, logistics or IoT domain experience
+benefits:
+  - Health cover for family
+  - Learning budget INR 1.5 lakh per year
+  - Four weeks of paid leave
+# Weighted rubric used to score every CV (weights sum to 1).
+rubric:
+  skills_match: 0.4
+  relevant_experience: 0.3
+  delivery_impact: 0.2
+  communication: 0.1
+shortlist_size: 3
+shortlist_threshold: 3.2   # weighted score out of 5

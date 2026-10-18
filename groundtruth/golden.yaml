@@ -1,0 +1,20 @@
+# Evaluation set. `expected` is the reference answer the judge compares against;
+# `sources` are the documents a good answer must cite.
+- question: Which account manager owns the customer whose outage was caused by firmware 4.2, and when does that customer's contract renew?
+  expected: Ravi Menon owns Halden Logistics, whose contract renews on 2026-11-30.
+  sources: [incidents, customers, contracts]
+- question: Does the Halden Logistics outage qualify for an SLA service credit, and how much?
+  expected: Yes. The outage lasted 6 hours, more than the 4 hour threshold, and was caused by Northwind firmware, so Halden gets a credit of 5% of that month's FleetOS fee.
+  sources: [incidents, contracts]
+- question: Who does the account manager for Kestrel Pharma report to?
+  expected: Kestrel's account manager is Ravi Menon, who reports to Lena Fischer, VP of Sales for EMEA.
+  sources: [customers, team]
+- question: What is the last date Kestrel Pharma can give notice to opt out of renewal?
+  expected: Notice is due at least 60 days before the 2026-12-15 renewal, so by 2026-10-16.
+  sources: [contracts]
+- question: Did the Sunpeak Grocers incident earn an SLA credit?
+  expected: No. There was no picking outage and the cause was a supplier battery batch, not Northwind firmware, so no credit applies.
+  sources: [incidents, contracts]
+- question: What was Northwind Robotics' total revenue in 2025?
+  expected: ABSTAIN
+  sources: []

@@ -1,0 +1,19 @@
+---
+call_id: CALL-1029
+date: 2026-10-06
+rep: Ravi Menon
+account: Halden Logistics
+stage: Renewal
+speakers:
+  Ravi: rep
+  Ingrid: customer
+---
+[00:00] Ravi: Hi Ingrid, great to speak again. I wanted to walk you through everything new in FleetOS this year, because there's a lot. We launched predictive maintenance, a new dashboard, zone heat maps, and firmware 4.3 brings faster calibration. We've also improved the mobile app, and the reporting API now supports hourly exports. Customers really like the heat maps in particular, and I think your Gardermoen team would get a lot out of them.
+[00:58] Ingrid: Okay. Before we go further, I need to raise May. Six hours of downtime on a night shift is not something my COO has forgotten.
+[01:10] Ravi: Absolutely, and firmware 4.2.1 fixed that. It hasn't happened again.
+[01:16] Ingrid: That's not really the point. We also haven't seen the service credit on our invoice yet.
+[01:24] Ravi: I'll have to check on that with finance.
+[01:28] Ingrid: Kinexa has been in to see us twice. Their contract includes a four-hour response guarantee with penalties.
+[01:38] Ravi: Kinexa is much newer than us, and our arms are more reliable overall. I think once you see the new dashboard you'll feel better about it. The renewal is at the end of November, so I'd love to get the paperwork moving.
+[01:52] Ingrid: I'm not signing anything until the credit is sorted and I see what you're offering on response times.
+[02:01] Ravi: Understood. I'll look into it.

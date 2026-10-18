@@ -1,0 +1,23 @@
+---
+call_id: CALL-1034
+date: 2026-10-13
+rep: Priya Shah
+account: Marlow Foods
+stage: Discovery
+speakers:
+  Priya: rep
+  Ken: customer
+---
+[00:00] Priya: Hi Ken, thanks for taking the call. How are your picking operations running today?
+[00:08] Ken: Mostly manual. We have one warehouse in Columbus with about two hundred pickers across two shifts.
+[00:18] Priya: What's the biggest headache in that operation right now?
+[00:24] Ken: Labour turnover. We lose about forty percent of pickers a year and training each one takes three weeks.
+[00:36] Priya: What does that turnover cost you, roughly?
+[00:41] Ken: Our HR team put it around one point two million dollars a year in hiring and training.
+[00:50] Priya: Has the team looked at automation before?
+[00:54] Ken: We looked at a goods-to-person system two years ago, but the install needed a twelve week shutdown, and that killed it.
+[01:06] Priya: Our C3 carts work alongside existing shelving, so installs usually take a weekend per zone. Who would be involved in a decision like this?
+[01:16] Ken: Me as operations director, and our VP of supply chain. Budget would come in next fiscal year, which starts in July.
+[01:28] Priya: Okay. Would it help if I sent a short case study from a food distributor of a similar size?
+[01:35] Ken: Sure, send it over.
+[01:38] Priya: Great, I'll send that this week. Thanks Ken.
