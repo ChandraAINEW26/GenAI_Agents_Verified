@@ -110,6 +110,7 @@ class State(TypedDict, total=False):
     verify_attempts: int
     verify_feedback: str
     rejected_extracts: int
+    stalled: int  # consecutive lookups that added no new evidence
 
 
 # ---------- prompts ----------
@@ -143,7 +144,7 @@ def build_agent(llm: LLM, index: CorpusIndex, tracer: Tracer | None = None, top_
             effort="low",
         )
         return {"anonymized": result, "steps_taken": 0, "evidence": {}, "past_steps": [], "verify_attempts": 0,
-                "rejected_extracts": 0}
+                "rejected_extracts": 0, "stalled": 0}
 
     @node("plan")
     def plan(state: State):
@@ -189,7 +190,7 @@ def build_agent(llm: LLM, index: CorpusIndex, tracer: Tracer | None = None, top_
         passages = index.search(decision.tool, [decision.task, *queries], k=top_k)
         if not passages:
             return {"past_steps": [*state["past_steps"], f"{decision.task} -> nothing found"],
-                    "steps_taken": state["steps_taken"] + 1}
+                    "steps_taken": state["steps_taken"] + 1, "stalled": state["stalled"] + 1}
 
         distilled = llm.structured(
             SYSTEM,
@@ -208,14 +209,27 @@ def build_agent(llm: LLM, index: CorpusIndex, tracer: Tracer | None = None, top_
             if source is None or support_ratio(extract.text, source.text) < GROUNDING_THRESHOLD:
                 rejected += 1  # cites a passage it was not shown, or adds words the passage lacks
                 continue
-            evidence[extract.passage_id] = {"id": extract.passage_id, "text": extract.text}
+            # Several extracts can come from one passage (e.g. a notice period and a renewal date in the
+            # same contract clause). Merge them; replacing would drop the earlier fact and make the
+            # agent re-retrieve it forever.
+            previous = evidence.get(extract.passage_id)
+            text = extract.text.strip()
+            if previous and text not in previous["text"]:
+                text = f"{previous['text']} … {text}"
+            elif previous:
+                text = previous["text"]
+            evidence[extract.passage_id] = {"id": extract.passage_id, "text": text}
             kept += 1
-        tracer.print(f"   kept {kept} extract(s), rejected {rejected} ungrounded")
+        new_info = evidence != state["evidence"]
+        tracer.print(f"   kept {kept} extract(s), rejected {rejected} ungrounded"
+                     + ("" if new_info else " — no new information"))
+        outcome = f"{kept} supporting passage(s)" if new_info else "no new information (do not repeat this lookup)"
         return {
             "evidence": evidence,
-            "past_steps": [*state["past_steps"], f"{decision.task} -> {kept} supporting passage(s)"],
+            "past_steps": [*state["past_steps"], f"{decision.task} -> {outcome}"],
             "steps_taken": state["steps_taken"] + 1,
             "rejected_extracts": state["rejected_extracts"] + rejected,
+            "stalled": 0 if new_info else state["stalled"] + 1,
         }
 
     @node("answer_step")
@@ -233,7 +247,7 @@ def build_agent(llm: LLM, index: CorpusIndex, tracer: Tracer | None = None, top_
         )
         valid = [c for c in result.citations if c in state["evidence"]]
         note = f"{decision.task} -> {result.answer} (cites {', '.join(valid) or 'nothing'})"
-        return {"past_steps": [*state["past_steps"], note], "steps_taken": state["steps_taken"] + 1}
+        return {"past_steps": [*state["past_steps"], note], "steps_taken": state["steps_taken"] + 1, "stalled": 0}
 
     @node("replan")
     def replan(state: State):
@@ -243,7 +257,8 @@ def build_agent(llm: LLM, index: CorpusIndex, tracer: Tracer | None = None, top_
             + "\n\nSteps done:\n- " + "\n- ".join(state["past_steps"])
             + f"\n\nEvidence:\n{evidence_block(state)}\n\n"
             "Decide whether the evidence already answers the whole original question. If not, return the steps "
-            "still needed (drop finished ones, add new ones if a lookup came back empty).",
+            "still needed (drop finished ones). Never repeat a lookup that returned no new information; if a value "
+            "is not written anywhere, either derive it from the evidence with a reasoning step or leave it out.",
             Replan,
             effort="low",
         )
@@ -254,6 +269,10 @@ def build_agent(llm: LLM, index: CorpusIndex, tracer: Tracer | None = None, top_
             return "final_answer"
         if state["steps_taken"] >= state["max_steps"]:
             tracer.print("[yellow]step budget reached — answering with what was found[/yellow]")
+            return "final_answer"
+        if state["stalled"] >= 2:
+            # Two lookups in a row found nothing new: more searching will not help.
+            tracer.print("[yellow]no progress in 2 lookups — answering with what was found[/yellow]")
             return "final_answer"
         return "task_handler"
 

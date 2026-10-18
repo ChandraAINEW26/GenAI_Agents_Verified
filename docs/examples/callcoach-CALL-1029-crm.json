@@ -1,0 +1,64 @@
+{
+  "account": "Halden Logistics",
+  "call_id": "CALL-1029",
+  "call_date": "2026-10-06",
+  "rep": "Ravi Menon",
+  "current_stage": "Renewal",
+  "recommended_stage": "Negotiation",
+  "deal_risk": "high",
+  "risk_flags": [
+    "2 objection(s) left unresolved",
+    "no champion identified",
+    "no dated next step"
+  ],
+  "next_steps": [
+    {
+      "owner": "rep",
+      "action": "check on the service credit with finance",
+      "due": ""
+    },
+    {
+      "owner": "rep",
+      "action": "look into the service credit and response time details",
+      "due": ""
+    }
+  ],
+  "competitors": [
+    "Kinexa"
+  ],
+  "meddpicc": {
+    "metrics": {
+      "status": "unknown",
+      "detail": "No metrics or ROI figures were discussed in the call."
+    },
+    "economic_buyer": {
+      "status": "partial",
+      "detail": "The customer's COO was referenced as a key stakeholder."
+    },
+    "decision_criteria": {
+      "status": "confirmed",
+      "detail": "Customer requires a service credit on the invoice and wants clarity on response\u2011time guarantees."
+    },
+    "decision_process": {
+      "status": "unknown",
+      "detail": "The steps or timeline for making the renewal decision were not described."
+    },
+    "paper_process": {
+      "status": "confirmed",
+      "detail": "Customer will not sign renewal paperwork until the credit issue is resolved and response times are clarified."
+    },
+    "identify_pain": {
+      "status": "confirmed",
+      "detail": "Customer highlighted downtime, missing service credit, and concerns about response times."
+    },
+    "champion": {
+      "status": "unknown",
+      "detail": "No internal advocate for the vendor was identified."
+    },
+    "competition": {
+      "status": "confirmed",
+      "detail": "Kinexa was mentioned as a competitor offering a four\u2011hour response guarantee with penalties."
+    }
+  },
+  "coaching_score": 38
+}

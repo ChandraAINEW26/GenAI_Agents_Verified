@@ -112,16 +112,60 @@ def test_unverifiable_answer_becomes_abstain(index):
     assert sum(1 for name, _ in llm.calls if name == "FinalAnswer") == 2  # one rewrite, then give up
 
 
-def test_step_budget_stops_the_loop(index):
+def test_extracts_from_the_same_passage_are_merged(index):
+    """Regression: two facts from one passage used to overwrite each other, looping until the budget ran out."""
+    tasks = iter([{"task": "Find the notice period", "tool": "chunks", "search_queries": ["Kestrel opt out notice"]},
+                  {"task": "Find the renewal date", "tool": "chunks", "search_queries": ["Kestrel renews"]}])
+    facts = iter(["Kestrel may opt out of automatic renewal by giving written notice at least 60 days before the "
+                  "renewal date.", "Three-year contract, renews on 2026-12-15."])
+
+    def distill(system, prompt):
+        pid, _ = passage_line(prompt, "Kestrel may opt out")
+        return {"extracts": [{"passage_id": pid, "text": next(facts)}]}
+
+    replans = iter([{"can_answer_now": False, "remaining_steps": ["Find the renewal date"]},
+                    {"can_answer_now": True, "remaining_steps": []}])
+    seen = {}
+
+    def final(system, prompt):
+        seen["evidence"] = prompt
+        return {"reasoning": "", "answer": "2026-10-16", "citations": ["contracts#c3"], "confidence": "high",
+                "abstain": False}
+
     llm = FakeLLM({
+        "Anonymized": lambda s, p: {"question": p, "entities": []},
+        "Plan": lambda s, p: {"steps": ["Find the notice period", "Find the renewal date"]},
+        "TaskDecision": lambda s, p: next(tasks),
+        "Distilled": distill,
+        "Replan": lambda s, p: next(replans),
+        "FinalAnswer": final,
+        "Grounding": lambda s, p: {"grounded": True, "unsupported_claims": []},
+    })
+    ask(build_agent(llm, index), "What is the last date Kestrel can give notice?")
+    assert "60 days" in seen["evidence"] and "2026-12-15" in seen["evidence"]
+
+
+def endless(tool: str) -> FakeLLM:
+    return FakeLLM({
         "Anonymized": lambda s, p: {"question": "q", "entities": []},
         "Plan": lambda s, p: {"steps": ["look", "look again"]},
-        "TaskDecision": lambda s, p: {"task": "look", "tool": "chunks", "search_queries": ["firmware"]},
+        "TaskDecision": lambda s, p: {"task": "look", "tool": tool, "search_queries": ["firmware"]},
         "Distilled": lambda s, p: {"extracts": []},
+        "StepAnswer": lambda s, p: {"reasoning": "", "answer": "still missing", "citations": []},
         "Replan": lambda s, p: {"can_answer_now": False, "remaining_steps": ["look again"]},
         "FinalAnswer": lambda s, p: {"reasoning": "", "answer": "Not enough information.", "citations": [],
                                      "confidence": "low", "abstain": True},
     })
-    state = ask(build_agent(llm, index), "an endless question", max_steps=3)
+
+
+def test_repeated_lookups_with_no_new_evidence_stop_early(index):
+    """Regression: the agent used to repeat a fruitless lookup until the step budget ran out."""
+    state = ask(build_agent(endless("chunks"), index), "a question the corpus cannot answer", max_steps=6)
+    assert state["steps_taken"] == 2 and state["stalled"] == 2
+    assert state["final"].abstain
+
+
+def test_step_budget_stops_the_loop(index):
+    state = ask(build_agent(endless("answer"), index), "an endless question", max_steps=3)
     assert state["steps_taken"] == 3
     assert state["final"].abstain

@@ -1,129 +1,201 @@
-# GenAI Agents — rebuilt for practice
+# GenAI Agents — Verified
 
-Three projects from [NirDiamant/GenAI_Agents](https://github.com/NirDiamant/GenAI_Agents), rebuilt from scratch in
-Python + LangGraph, renamed, and extended with production-style features.
+[![tests](https://github.com/ChandraAINEW26/GenAI_Agents_Verified/actions/workflows/tests.yml/badge.svg)](https://github.com/ChandraAINEW26/GenAI_Agents_Verified/actions/workflows/tests.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
+![LangGraph](https://img.shields.io/badge/LangGraph-1.2-1c3c3c)
+![LLM](https://img.shields.io/badge/LLM-Claude%20%7C%20Ollama-8a63d2)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-| Project | Rebuilt from | What it does |
-|---|---|---|
-| **CiteSure** | #45 Controllable RAG Agent | Answers multi-hop questions from your documents, with checked citations, and says "I don't know" when the documents don't say |
-| **BlindHire** | #46 HR AI Assistant | Hiring pipeline: job description → blind CV screening → shortlist → interview kits → drafted emails, with human approvals |
-| **CallCoach** | #28 Sales Call Analyzer | Sales call transcript or audio → coaching scorecard, MEDDPICC, objections, CRM update JSON, follow-up email, team report |
+**Three production-style GenAI agents built on LangGraph, where the LLM proposes and code verifies.**
+Every answer, score and finding carries evidence from the source material, deterministic code checks that
+evidence, and anything that fails the check is rejected rather than shown as fact.
 
-All three share `agentkit/`: one LLM interface with three backends, plus run tracing.
+| Agent | Domain | What it does | Headline result |
+|---|---|---|---|
+| **[CiteSure](citesure/)** | Knowledge / RAG | Answers multi-step questions from your documents with verified citations, and abstains when the documents don't say | 6/6 and 5/6 on two golden-set runs; never answered the unanswerable question |
+| **[BlindHire](blindhire/)** | HR / recruiting | Drafts the job description, screens anonymised CVs against a weighted rubric with quoted evidence, and stops for human approval | Same shortlist across runs; no name or gender label ever reaches the scorer (tested) |
+| **[CallCoach](callcoach/)** | Sales | Turns a call transcript or audio into a coaching scorecard, MEDDPICC, CRM update and follow-up email | Strong call 94–100, weak renewal call 32–38 with high risk |
 
-## Setup
+---
 
-```bash
-cd ~/Documents/AIPrep/genai-agents-practice
-uv sync                      # add --extra audio for CallCoach audio transcription
+## System architecture
+
+```mermaid
+flowchart TB
+    U([User / CLI]) --> CS & BH & CC
+    subgraph Agents["LangGraph agents"]
+        CS["<b>CiteSure</b><br/>anonymize → plan → retrieve ⟲ replan<br/>→ answer → verify"]
+        BH["<b>BlindHire</b><br/>JD ⏸ → redact → score ×N ∥<br/>→ rank ⏸ → kits → outbox"]
+        CC["<b>CallCoach</b><br/>parse → 4 analysers ∥<br/>→ verify → coach → scorecard"]
+    end
+    subgraph Verify["Deterministic verification (code)"]
+        V1[citation ids exist<br/>extract ⊆ source]
+        V2[CV quote exists<br/>rubric math · knockouts]
+        V3[quote ∈ cited turn<br/>email figures were said]
+    end
+    CS --> V1
+    BH --> V2
+    CC --> V3
+    subgraph Kit["agentkit"]
+        L[Typed LLM interface<br/>Pydantic structured outputs]
+        T[JSONL tracing · token & cost meter]
+    end
+    Agents --> Kit
+    L --> C[Claude<br/>Anthropic SDK]
+    L --> O[Ollama<br/>local or cloud]
+    L --> F[FakeLLM<br/>offline tests]
+    BH -.-> DB[(SQLite checkpoints<br/>resumable reviews)]
+    CC -.-> W[faster-whisper<br/>local audio]
+
+    classDef verify fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    class V1,V2,V3 verify
 ```
 
-Pick a model (all three projects use the same setting):
+`⏸` = human approval (LangGraph `interrupt`), `∥` = parallel branches, `⟲` = loop. Detailed design:
+**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
-| `AGENT_LLM_PROVIDER` | Uses | Needs |
+## What each agent demonstrates
+
+<table>
+<tr><th>CiteSure</th><th>BlindHire</th><th>CallCoach</th></tr>
+<tr valign="top"><td>
+
+- Plan-and-execute agent with re-planning
+- Entity anonymisation before planning
+- 3 retrieval stores, BM25 + Reciprocal Rank Fusion
+- Extract grounding check in code
+- Citation validation and answer self-verification
+- Step budget, stall detection, honest abstain
+- Golden-set evaluation harness
+
+</td><td>
+
+- Human-in-the-loop with `interrupt()`
+- Durable state with SQLite; quit and resume
+- Dynamic fan-out with `Send`
+- PII and protected-attribute redaction
+- Evidence-checked rubric scoring
+- Deterministic ranking and knockouts
+- Inclusive-language lint, outbox instead of auto-send
+
+</td><td>
+
+- Static fan-out / fan-in (4 analysers)
+- Measured conversation metrics
+- Quote-in-turn verification
+- MEDDPICC qualification
+- Deterministic 0–100 scorecard + risk flags
+- CRM update JSON and team report
+- Local audio: ffmpeg + faster-whisper
+
+</td></tr>
+</table>
+
+## Quick start
+
+```bash
+git clone https://github.com/ChandraAINEW26/GenAI_Agents_Verified.git
+cd GenAI_Agents_Verified
+uv sync                          # add --extra audio for CallCoach audio transcription
+uv run pytest -q                 # 18 offline tests, no model needed
+```
+
+Choose a model with one environment variable:
+
+| `AGENT_LLM_PROVIDER` | Model | Needs |
 |---|---|---|
 | `claude` (default when `ANTHROPIC_API_KEY` is set) | `claude-opus-5-5` (override with `CLAUDE_MODEL`) | `ANTHROPIC_API_KEY` |
-| `ollama` (default otherwise) | `gpt-oss:120b-cloud` (override with `OLLAMA_MODEL`) | Ollama running locally |
-| `fake` | scripted responses | nothing — used by the tests |
+| `ollama` (default otherwise) | `gpt-oss:120b-cloud` (override with `OLLAMA_MODEL`) | [Ollama](https://ollama.com) running locally |
+| `fake` | scripted responses | nothing |
 
-## Run
+Run the agents:
 
 ```bash
-# CiteSure
-uv run python -m citesure ask "Which account manager owns the customer whose outage was caused by firmware 4.2, and when does it renew?"
-uv run python -m citesure ask --corpus ~/some/folder/of/pdfs "your question"
-uv run python -m citesure eval            # golden set -> runs/citesure-eval.md
+uv run python -m citesure ask "Which account manager owns the customer whose outage was caused by firmware 4.2, and when does that customer's contract renew?"
+uv run python -m citesure eval
 
-# BlindHire (stops at each review; Ctrl+C at a review and `resume` later)
-uv run python -m blindhire run --thread demo
+uv run python -m blindhire run --thread demo          # stops for your approval twice
 uv run python -m blindhire resume --thread demo
 
-# CallCoach
-uv run python -m callcoach analyze callcoach/sample_calls/halden_renewal.txt
-uv run python -m callcoach batch callcoach/sample_calls        # + runs/callcoach/team-report.md
-uv run python -m callcoach transcribe call.m4a --rep "Priya Shah" --account "Acme"   # needs --extra audio
-
-# Offline tests (no model calls)
-uv run pytest -q
+uv run python -m callcoach batch callcoach/sample_calls
+uv run python -m callcoach transcribe call.m4a --rep "Priya Shah" --account "Acme"
 ```
 
-Everything a run produces goes to `runs/` (reports, traces as JSONL, outbox, CRM JSON).
+Outputs (reports, traces, outbox, CRM JSON) are written to `runs/`. Sample outputs from real runs are in
+**[docs/examples/](docs/examples/)**.
 
----
+## Results
 
-## CiteSure (from #45 Controllable RAG Agent)
+All numbers below come from real runs with `gpt-oss:120b-cloud` on the bundled fictional data.
 
-```mermaid
-flowchart LR
-  A[anonymize] --> P[plan] --> D[deanonymize<br/>in code] --> T[task_handler]
-  T -->|chunks / quotes / summaries| R[retrieve + distill<br/>+ grounding check]
-  T -->|answer| S[answer_step]
-  R --> RP[replan]
-  S --> RP
-  RP -->|more steps| T
-  RP -->|done or budget hit| F[final_answer] --> V[verify]
-  V -->|unsupported, retry once| F
-  V --> E((end))
+**CiteSure** — golden-set evaluation ([report](docs/examples/citesure-eval.md))
+
+| Run | Accuracy | Source recall | Abstain accuracy | Avg. steps |
+|---|---|---|---|---|
+| 1 | 6 / 6 | 100% | 100% | 2.2 |
+| 2 | 5 / 6 | 83% | 83% | 2.3 |
+
+The miss in run 2 was an over-cautious abstain on a "no" answer, never a wrong fact. Two bugs found by earlier
+evaluation runs (facts overwriting each other, repeated fruitless lookups) are fixed and covered by regression tests.
+
+**BlindHire** — Senior AI Engineer role, 5 CVs ([report](docs/examples/blindhire-report.md))
+
+| Candidate | Weighted /5 | Must-haves | Decision |
+|---|---|---|---|
+| C-01 | 4.90–5.00 | all met | Interview |
+| C-02 | 4.00–4.50 | all met | Interview |
+| C-04 | 2.60 | under 3 yrs Python | Decline |
+| C-05 | 1.90–2.30 | no production, no cloud | Decline |
+| C-03 | 1.10–1.20 | no Python | Decline |
+
+Ranges across three runs; the ranking and decisions were identical every time.
+
+**CallCoach** — 3 calls, 2 reps ([team report](docs/examples/callcoach-team-report.md))
+
+| Rep | Calls | Avg score | Talk ratio | Questions / call |
+|---|---|---|---|---|
+| Priya Shah | 2 | 85–90 | 52% | 6.0 |
+| Ravi Menon | 1 | 32–38 | 64% | 0.0 |
+
+Ranges across four runs.
+
+## Repository layout
+
+```text
+.
+├── agentkit/            shared LLM interface (Claude, Ollama, Fake), tracing, usage meter
+├── citesure/            plan-and-execute RAG agent, index, evaluation, sample corpus, golden set
+├── blindhire/           hiring workflow, redaction, sample job and CVs
+├── callcoach/           call pipeline, transcript parser, audio transcription, sample calls
+├── tests/               offline tests for all three agents
+├── docs/
+│   ├── ARCHITECTURE.md  shared design, patterns, trade-offs
+│   └── examples/        real outputs: eval report, screening report, call reports, CRM JSON
+└── .github/workflows/   CI: offline tests on every push
 ```
 
-| Original | Rebuild |
-|---|---|
-| Answers without verifiable sources | Every extract keeps its passage id; answers must cite ids; code drops ids that were never retrieved |
-| LLM checks whether distilled text is grounded | Code checks word overlap between each extract and its source passage (cheap, deterministic); invented extracts are rejected |
-| Plan/replan loop could run forever | `--max-steps` budget; then it answers from what it found or abstains |
-| — | Final answer verification: an unsupported answer is sent back once, then downgraded to an honest abstain |
-| LLM de-anonymises the plan | String replacement in code |
-| FAISS + OpenAI embeddings | BM25 (pure Python) over 3 stores, with query rewrites merged by Reciprocal Rank Fusion; works on any folder of .md/.txt/.pdf; summaries cached by content hash |
-| Ragas notebook | `eval` command: LLM-judge correctness, source recall (code), abstain accuracy → markdown report |
+## Tech stack
 
-Sample data is a fictional company (`sample_corpus/`) whose facts are spread across files, so every golden question needs 2–3 lookups.
+Python 3.12 · LangGraph (StateGraph, Send, interrupt, SqliteSaver) · Anthropic SDK (structured outputs, effort,
+refusal fallbacks) · Ollama · Pydantic v2 · faster-whisper · ffmpeg · pypdf · Rich · pytest · uv · GitHub Actions
 
-## BlindHire (from #46 HR AI Assistant)
+## Roadmap
 
-```mermaid
-flowchart LR
-  L[load] --> J[draft_jd + lint] --> RJ{{review_jd<br/>interrupt}}
-  RJ -->|changes| J
-  RJ -->|approved| X[redact<br/>blind CVs]
-  X -->|Send per CV| S1[score_cv] & S2[score_cv] & S3[score_cv]
-  S1 & S2 & S3 --> K[rank] --> RS{{review_shortlist<br/>interrupt}}
-  RS --> I[interview_kits] --> M[draft_messages<br/>outbox] --> REP[report]
-```
+- CiteSure: dense embeddings as a fourth ranking in the fusion; larger golden set
+- BlindHire: double-scoring consistency check; reference-check step with its own approval
+- CallCoach: deal health across several calls for one account; Claude vs Ollama agreement study
+- All: LangSmith / OpenTelemetry export of the JSONL traces
 
-| Original | Rebuild |
-|---|---|
-| Scrapes LinkedIn with a session cookie, auto-sends messages | Reads a folder of CVs; writes drafted emails to `outbox/`; nothing is sent |
-| Score parsed from free text with a regex | Structured rubric (weights in `job.yaml`); weighted total, must-have knockouts and shortlist computed in code |
-| — | **Blind screening**: name, contact block, DOB, age, gender, marital status, nationality, religion and pronouns removed in code before scoring; names come back only after shortlist approval. A test asserts no name reaches the scorer |
-| — | **Evidence check**: every criterion needs CV quotes; code confirms each quote is in the CV, else the score is capped at 2 and flagged |
-| One CV at a time | Parallel scoring with LangGraph `Send` |
-| `NodeInterrupt`, in-memory | `interrupt()` + SQLite checkpointer: stop at a review, resume later by thread id |
-| — | Inclusive-language lint on the job description; interview kits aimed at each candidate's gaps |
+## Author
 
-## CallCoach (from #28 Sales Call Analyzer)
+**Chandra Yelleti** — AI Solutions Architect · [github.com/ChandraAINEW26](https://github.com/ChandraAINEW26)
 
-```mermaid
-flowchart LR
-  L[load + metrics<br/>in code] --> S[sentiment] & O[objections] & Q[MEDDPICC] & C[commitments]
-  S & O & Q & C --> V[verify quotes] --> Y[synthesize] --> SC[scorecard<br/>in code] --> W[report · CRM JSON · email]
-```
+## Acknowledgements
 
-| Original | Rebuild |
-|---|---|
-| One CrewAI agent, one prompt, free-form JSON | Four specialist analysers in parallel (fan-out/fan-in), each with a typed schema |
-| "Call engagement" guessed by the LLM | Talk ratio, questions, longest monologue measured from the transcript |
-| Findings not checked | Each finding cites a turn id + quote; code checks the quote is in that turn and drops it otherwise |
-| "Agent effectiveness score" from the LLM | Deterministic 0–100 scorecard (discovery, objection handling, talk balance, next steps) |
-| — | MEDDPICC qualification, risk flags, recommended stage, **CRM update JSON** |
-| — | Follow-up email draft; numbers/dates in it that were never said on the call are flagged "check before sending" |
-| — | `batch` mode → per-rep team report and objection themes |
-| Paid OpenAI Whisper API | Local faster-whisper (ffmpeg decode); LLM labels rep vs customer |
+The project ideas come from three tutorials in
+[NirDiamant/GenAI_Agents](https://github.com/NirDiamant/GenAI_Agents) (Controllable RAG Agent, HR AI Assistant,
+Sales Call Analyzer). The code, design and features here are an independent implementation.
 
----
+## License
 
-## Practice ideas
-
-1. **CiteSure** — add dense embeddings as a 4th ranking in the RRF fusion and check whether `eval` improves; add a question that needs arithmetic across three documents.
-2. **BlindHire** — run each CV twice and flag candidates whose scores differ by more than 0.5 (consistency check); add a "structured reference check" step with its own interrupt.
-3. **CallCoach** — compare the same call scored by Claude vs Ollama and measure agreement per scorecard component; add a "deal health over time" view across several calls for one account.
-4. **All** — swap `CLAUDE_MODEL` between Opus, Sonnet and Haiku and compare eval accuracy against the cost printed at the end of each run.
+[MIT](LICENSE)

@@ -328,7 +328,7 @@ wheels = [
 ]
 
 [[package]]
-name = "genai-agents-practice"
+name = "genai-agents-verified"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

@@ -42,6 +42,13 @@ def test_unsupported_figures_in_email():
     call = load_call(CALLS / "halden_renewal.txt")
     assert unsupported_figures("Sorry about the six hours of downtime; 4.2.1 fixed it.", call) == []
     assert unsupported_figures("We now offer a 3 hour SLA from Oct 23.", call) == ["3 hour", "oct 23"]
+    assert unsupported_figures("I will:\n1. Check the credit.\n2) Review response times.", call) == []
+
+    sunpeak = load_call(CALLS / "sunpeak_expansion.txt")  # says "nine hundred thousand", "five hundred thousand"
+    assert unsupported_figures("Beat $900k a season; approvals over 500 thousand; 18 percent", sunpeak) == []
+    assert unsupported_figures("Savings of $1.2 million", sunpeak) == ["1200000"]
+    marlow = load_call(CALLS / "marlow_discovery.txt")  # says "one point two million dollars"
+    assert unsupported_figures("Turnover costs you $1.2 million a year.", marlow) == []
 
 
 def test_pipeline_drops_findings_whose_quotes_are_invented(tmp_path):

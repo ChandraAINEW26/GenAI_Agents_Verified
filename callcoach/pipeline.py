@@ -219,7 +219,11 @@ UNITS = {w: i for i, w in enumerate(
     "seventeen eighteen nineteen".split())}
 TENS = {w: 10 * i for i, w in enumerate("_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()) if i > 1}
 SCALES = {"hundred": 100, "thousand": 1_000, "million": 1_000_000}
-NUMBER_PHRASE = re.compile(r"\b(?:(?:%s)(?:[\s-]+|\b))+" % "|".join([*UNITS, *TENS, *SCALES]))
+# A spoken number starts with a unit or tens word ("five hundred thousand"); a bare scale word after
+# digits ("500 thousand") is left for FIGURE_RE to read as a unit.
+_START = "|".join([*UNITS, *TENS])
+_ANY = "|".join([*UNITS, *TENS, *SCALES])
+NUMBER_PHRASE = re.compile(rf"\b(?:{_START})\b(?:[\s-]+(?:{_ANY})\b)*")
 
 
 def _words_to_number(phrase: str) -> str:
@@ -240,6 +244,8 @@ def _words_to_number(phrase: str) -> str:
 def _figures(text: str) -> set[str]:
     """Normalised figures: '6 hour', '18 %', 'oct 23', '900000', or a version like '4.2.1'."""
     text = re.sub(r"[‐-―−]", "-", re.sub(r"[  ]", " ", text.lower()))  # unicode dashes/spaces
+    text = re.sub(rf"\b({'|'.join(UNITS)})\s+point\s+({'|'.join(UNITS)})\b",  # "one point two" -> 1.2
+                  lambda m: f"{UNITS[m.group(1)]}.{UNITS[m.group(2)]}", text)
     text = NUMBER_PHRASE.sub(lambda m: _words_to_number(m.group(0)) + " ", text)
     found = set()
     for match in FIGURE_RE.finditer(text):
@@ -247,7 +253,11 @@ def _figures(text: str) -> set[str]:
         figure = re.sub(r"(?<=\d),(?=\d{3})", "", figure)  # 900,000 -> 900000
         figure = re.sub(r"(?<=\d)(st|nd|rd|th)$", "", figure)
         figure = re.sub(r"^([a-z]{3})[a-z]*\.?", r"\1", figure)  # month names -> 3 letters
-        figure = re.sub(r"\s*(dollars?|thousand|million)$", "", figure) if figure[0].isdigit() else figure
+        scale = re.fullmatch(r"(\d+(?:\.\d+)?)\s*(k|thousand|million)", figure)
+        if scale:  # 900k, 900 thousand and 900000 are the same figure
+            factor = 1_000_000 if scale.group(2) == "million" else 1_000
+            figure = f"{float(scale.group(1)) * factor:.0f}"
+        figure = re.sub(r"\s*dollars?$", "", figure) if figure[0].isdigit() else figure
         found.add(re.sub(r"s$", "", figure.replace(" %", "%")) if not figure[-1].isdigit() else figure)
     return found
 
@@ -259,6 +269,7 @@ def unsupported_figures(email: str, call: Call) -> list[str]:
     though "4.3" was said. A drafted email that promises "a 2-hour SLA by
     Oct 23" when nobody said so is worse than no email, so these are flagged.
     """
+    email = re.sub(r"(?m)^\s*\d{1,2}[.)]\s+", "", email)  # numbered-list markers are not figures
     spoken = _figures(" ".join(t.text for t in call.turns))
     if call.meta.get("date"):  # the call's own date is known, not invented
         spoken |= _figures(f"{call.meta['date']:%B} {call.meta['date'].day}" if hasattr(call.meta["date"], "day")

@@ -1,0 +1,8 @@
+{"t": 1792311831.297, "event": "node", "node": "anonymize", "ms": 1129, "updated": ["anonymized", "evidence", "past_steps", "rejected_extracts", "stalled", "steps_taken", "verify_attempts"]}
+{"t": 1792311832.5, "event": "node", "node": "plan", "ms": 1200, "updated": ["plan"]}
+{"t": 1792311832.503, "event": "node", "node": "deanonymize", "ms": 2, "updated": ["plan"]}
+{"t": 1792311834.779, "event": "node", "node": "task_handler", "ms": 2275, "updated": ["decision"]}
+{"t": 1792311835.938, "event": "node", "node": "retrieve", "ms": 1157, "updated": ["evidence", "past_steps", "rejected_extracts", "stalled", "steps_taken"]}
+{"t": 1792311837.037, "event": "node", "node": "replan", "ms": 1098, "updated": ["plan"]}
+{"t": 1792311838.105, "event": "node", "node": "task_handler", "ms": 1066, "updated": ["decision"]}
+{"t": 1792311839.411, "event": "node", "node": "retrieve", "ms": 1304, "updated": ["evidence", "past_steps", "rejected_extracts", "stalled", "steps_taken"]}
